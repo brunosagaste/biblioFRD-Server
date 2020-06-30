@@ -54,6 +54,9 @@ class RenewalModel
 
     public function UpdateRenew($copy) {
         
+        // Lo armé yo y todavía no se cómo funciona
+        // Pero equipo que gana no se toca, no lo vas a modificar que anda
+
         $date = $copy->dueBackDt(); //Obtengo fecha de devolución.
         $copy_model = new CopyModel();
         //Envío fecha de devolución y la copia. Obtengo cuantos días puede renovar
@@ -78,14 +81,14 @@ class RenewalModel
             $copystm = $copy->getCopy($user_copyid);
             //Verifico que la copia exista
             if ($copystm->rowCount()==0) {
-                throw new apiError('Wrong copy');
+                throw new apiError('La copia no existe');
             }
 
             $row = $copystm->fetch(PDO::FETCH_ASSOC);
             extract($row);
             //Verifico que el mbrid realmente tenga prestada esa copia
             if ($user_mbrid != $mbrid) {
-                throw new apiError('Wrong copy');
+                throw new apiError('No tiene un préstamo sobre la copia');
             }
 
             $copyObj = new Copy();
@@ -112,14 +115,14 @@ class RenewalModel
             }
             //Verifico si la copia se puede prestar
             if ($copyObj->renewalCount()==0 and $copiesIn!=0 and $bibnum>1 and $copyObj->daysLate()==0 and $holdnum==0) {
-                //Renuevo
+                //Renuevo por dos días hábiles
                 $copyObj = $this->UpdateRenew($copyObj);
             } else {
-                throw new apiError('This copy cannot be renewed');
+                throw new apiError('Esta copia no puede ser renovada');
             }
             //Respondo
             $this->response->setResponse(true);
-            $this->response->result = ['message' => "Renewed", "date" => $copyObj->dueBackDt()];
+            $this->response->result = ['message' => "Copia renovada", "date" => $copyObj->dueBackDt()];
 
             return $this->response;
         }

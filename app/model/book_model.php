@@ -17,7 +17,7 @@ class BookModel
         $this->response = new Response();
     }
 
-    public function GetAll()
+    /*public function GetAll()
     {
         try
         {
@@ -36,7 +36,7 @@ class BookModel
             $this->response->setResponse(false, $e->getMessage());
             return $this->response;
         }
-    }
+    }*/
 
     public function Get($id)
     {

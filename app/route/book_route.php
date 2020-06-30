@@ -1,6 +1,6 @@
 <?php
 
-use App\Model\BookModel;;
+use App\Model\BookModel;
 
 $app->group('/book/', function () {
 

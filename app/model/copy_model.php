@@ -19,6 +19,7 @@ Después verifico que no esté reservada
 Enconces envio la información de la copia
 */
 
+// Básicamente un copy paste de la clase Copy del sistema original. Algún día habría que fusionarla con CopyModel, representan lo mismo.
 class Copy{
  
     // database connection and table name
@@ -167,7 +168,7 @@ class CopyModel
         }
 
 
-    public function Get($mbrid)
+    public function Get($mbrid, $reqStatus)
     {
         try
         {
@@ -176,7 +177,7 @@ class CopyModel
                 $stm = $this->getCopiesByMbrid($mbrid);           
                 // products array
                 $copy_arr=array();
-                $copy_arr["copy"]=array();
+                //$copy_arr["copy"]=array();
              
                 // retrieve our table contents
                 // fetch() is faster than fetchAll()
@@ -194,9 +195,13 @@ class CopyModel
                         "author" => $author,
                         "due_back_dt" => $due_back_dt,
                         "days_late" => $days_late,
-                        "renew" => ""
+                        "renew" => "",
+                        "status" => ""
                     );
 
+                    // Mucho código repetido con respecto Renew de RenewalModel.
+                    // Quizá esto podría ser un método de una clase estática o una función
+                    // En RenewalModel está comentado
                     $renewal_count_copy = $renewal_count;
                     $days_late_copy = $days_late;
 
@@ -217,13 +222,22 @@ class CopyModel
 
                     if ($renewal_count_copy==0 and $copiesIn!=0 and $bibnum>0 and $days_late_copy==0 and $holdnum==0) {
                         $renew = true;
+                        $status = "Renovable";
                     } else {
                         $renew = false;
+                        if ($days_late_copy > 0) {
+                            $status = "Vencido";
+                        } else {
+                            $status = "No renovable";
+                        }
                     }
-             
+                    
                     $copy_item["renew"] = $renew;
-             
-                    array_push($copy_arr["copy"], $copy_item);
+                    $copy_item["status"] = $status;
+
+                    if ($reqStatus == $status or $reqStatus == "Todos" or $reqStatus == null) {
+                        array_push($copy_arr, $copy_item);
+                    }
                 }
 
             $this->response->setResponse(true);

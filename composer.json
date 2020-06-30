@@ -13,6 +13,7 @@
     ],
     "require": {
         "php": ">=5.6",
+        "akrabat/ip-address-middleware": "^0.6.0",
         "firebase/php-jwt": "^5.0",
         "monolog/monolog": "^1.17",
         "slim/php-view": "^2.0",
@@ -24,7 +25,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "App\\Service\\": "app/service"
         }
     },
     "config": {

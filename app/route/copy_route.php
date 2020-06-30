@@ -12,7 +12,8 @@ $app->group('/copy/', function () {
     $this->get('get', function ($req, $res, $args) {
         $um = new CopyModel();
         $user = $req->getAttribute('decoded_token_data');
-
+        $allGetVars = $req->getQueryParams();
+        $status =  $allGetVars['status'];
 /*
         return $res
            ->withStatus(400)
@@ -26,7 +27,7 @@ $app->group('/copy/', function () {
 
         );*/
 
-        return $res->withJson($um->Get($user->id), 200, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+        return $res->withJson($um->Get($user->id, $status), 200, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
     });
 });
 

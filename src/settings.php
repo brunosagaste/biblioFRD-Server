@@ -16,15 +16,22 @@ return [
             'level' => \Monolog\Logger::DEBUG,
         ],
 
+        // Key para generar el token de identificación de usuario. No hacer un commit a Github ni compartir.
         "jwt" => [
             'secret' => 'supersecretkeyyoushouldnotcommittogithub'
         ],
+
         "db" => [            
              "host" => "localhost",             
              "dbname" => "espa33",             
              "user" => "root",            
              "pass" => ""        
          ],
+
+        // Key para enviar notificaciones. No hacer un commit a Github ni compartir.
+        "firebase" => [
+            'firebase_secret' => 'otraclavemasquenodebeterminarengithub'
+        ],
 
     ],
 
