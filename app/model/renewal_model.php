@@ -18,12 +18,12 @@ Después verifico que no esté reservada
 Entonces renuevo
 */
 
-class Renewal{
+class Renewal {
  
     // database connection and table name
     private $conn;
     private $table_name = "biblio_copy";
- 
+
     // object properties
     public $bibid;
     public $title;
@@ -34,25 +34,22 @@ class Renewal{
     //public $created;
  
     // constructor with $db as database connection
-    public function __construct($db){
+    public function __construct($db) {
         $this->conn = $db;
     }
 }
 
-
-class RenewalModel
-{
+class RenewalModel {
     private $db;
     //private $table = 'biblio';
     private $response;
 
-    public function __CONSTRUCT()
-    {
+    public function __construct() {
         $this->db = Database::StartUp();
         $this->response = new Response();
     }
 
-    public function UpdateRenew($copy) {
+    public function updateRenewalDate($copy) {
         
         // Lo armé yo y todavía no se cómo funciona
         // Pero equipo que gana no se toca, no lo vas a modificar que anda
@@ -68,17 +65,13 @@ class RenewalModel
         $copy->setDueBackDt($newDate);
         //Actualizo la base de datos
         $copy->update();
-
-        return $copy;
     }
 
-    public function Renew($user_mbrid, $user_copyid)
-    {
-        try
-        {   
+    public function renew($user_mbrid, $user_bibid, $user_copyid) {
+        try {   
             //Intento renovar una copia
-            $copy = new CopyModel();
-            $copystm = $copy->getCopy($user_copyid);
+            $copy_model = new CopyModel();
+            $copystm = $copy_model->getCopy($user_bibid, $user_copyid);
             //Verifico que la copia exista
             if ($copystm->rowCount()==0) {
                 throw new apiError('La copia no existe');
@@ -91,19 +84,64 @@ class RenewalModel
                 throw new apiError('No tiene un préstamo sobre la copia');
             }
 
-            $copyObj = new Copy();
-            $copyObj->setCopyid($copyid);
-            $copyObj->setBibid($bibid);
-            $copyObj->setDueBackDt($due_back_dt);
-            $copyObj->setRenewalCount($renewal_count);
-            $copyObj->setDaysLate($days_late);
+            $copy = new Copy();
+            $copy->setCopyid($copyid);
+            $copy->setBibid($bibid);
+            $copy->setDueBackDt($due_back_dt);
+            $copy->setRenewalCount($renewal_count);
+            $copy->setDaysLate($days_late);
+            $copy->setMbrid($mbrid);
+            $copy->setClassification($copy->findClassification());
+            $copy->setRenewalLimit($copy->findRenewalLimit());
+            
+            $renewalcheck = $this->checkRenewal($copy, $copy_model);
 
-            //Busco las reservas
+            if ($renewalcheck) {
+                $this->updateRenewalDate($copy); 
+            } else {
+                throw new apiError('Esta copia no puede ser renovada');
+            }
+            /*
             $hold = new HoldModel();
             $holdstm = $hold->getHolds($bibid, $copyid);
             $holdnum = $holdstm->rowCount();
-            //Busco las demás copias
             $bibstm = $copy->getCopiesByBibid($bibid);
+            $bibnum = $bibstm->rowCount();
+            $copiesIn = 0;
+
+            while ($bibrow = $bibstm->fetch(PDO::FETCH_ASSOC)) {
+                extract($bibrow);
+                if ($due_back_dt == "") {
+                    $copiesIn++;
+                }
+            }
+
+            $reachedLimit = $copy->hasReachedRenewalLimit($mbrid, $copyObj);
+            if (!$reachedLimit and $copiesIn != 0 and $bibnum > 1 and $copyObj->daysLate() == 0 and $holdnum == 0) {
+                $copyObj = $this->updateRenewalDate($copyObj);
+            } else {
+                throw new apiError('Esta copia no puede ser renovada');
+            }*/
+            //Respondo
+            $this->response->setResponse(true);
+            $this->response->result = ['message' => "Copia renovada", "date" => $copy->dueBackDt()];
+
+            return $this->response;
+
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
+    }
+
+    public function checkRenewal($copy, $copy_model) {
+        try {
+            //Busco las reservas
+            $hold = new HoldModel();
+            $holdstm = $hold->getHolds($copy->bibid(), $copy->copyid());
+            $holdnum = $holdstm->rowCount();
+            //Busco las demás copias
+            $bibstm = $copy_model->getCopiesByBibid($copy->bibid());
             $bibnum = $bibstm->rowCount(); //Cuento cuantas son
             $copiesIn = 0;
             //Cuento las copias prestadas
@@ -113,23 +151,18 @@ class RenewalModel
                     $copiesIn++;
                 }
             }
-            //Verifico si la copia se puede prestar
-            if ($copyObj->renewalCount()==0 and $copiesIn!=0 and $bibnum>1 and $copyObj->daysLate()==0 and $holdnum==0) {
-                //Renuevo por dos días hábiles
-                $copyObj = $this->UpdateRenew($copyObj);
-            } else {
-                throw new apiError('Esta copia no puede ser renovada');
-            }
-            //Respondo
-            $this->response->setResponse(true);
-            $this->response->result = ['message' => "Copia renovada", "date" => $copyObj->dueBackDt()];
 
-            return $this->response;
-        }
-        catch(Exception $e)
-        {
+            $reachedLimit = $copy_model->hasReachedRenewalLimit($copy);
+            //Verifico si la copia se puede prestar
+            if (!$reachedLimit and $copiesIn != 0 and $bibnum > 1 and $copy->daysLate() == 0 and $holdnum == 0) {
+                //Renuevo por dos días hábiles
+                return True;
+            } else {
+                return False;
+            }
+        } catch(Exception $e) {
             $this->response->setResponse(false, $e->getMessage());
             return $this->response;
-        }  
+        }
     }
 }

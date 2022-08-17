@@ -19,7 +19,6 @@ $app->post('/password', function (Request $req, Response $res, array $args) {
     if(!$result['error']) {
     	$bdstatus = $um->changePass(md5($form_newpw), $user->mbrid);
     }
-
     return $this->response->withJson(['error' =>  $result['error'], 'message' => $result['message'], 'developerMessage' => $result['field']], $result['status'], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 
 });

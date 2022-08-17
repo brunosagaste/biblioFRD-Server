@@ -14,6 +14,8 @@ class FCM {
         $fields = array(
             'to' => $to,
             'notification' => $message,
+            'priority' => 'high',
+            'android' => array('priority' => 'high'),
         );
         return $this->sendPushNotification($fields);
     }
@@ -63,7 +65,7 @@ class FCM {
  
         // Disabling SSL Certificate support temporarly
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
- 
+        var_dump($fields);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
  
         // Execute post

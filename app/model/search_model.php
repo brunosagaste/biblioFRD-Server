@@ -5,38 +5,32 @@ use App\Lib\Database;
 use App\Lib\Response;
 use PDO;
 
-class SearchModel
-{
+class SearchModel {
     private $db;
-    private $table = 'biblio';
+    private $biblio_table = "biblio";
+    private $biblio_copy_table = "biblio_copy";
     private $response;
 
-    public function __CONSTRUCT()
-    {
+    public function __construct() {
         $this->db = Database::StartUp();
         $this->response = new Response();
     }
 
-
-    public function Search($text)
-    {
-        try
-        {
+    public function search($text) {
+        try {
+            $text = $text."*";
             $result = array();
-
-            $stm = $this->db->prepare("SELECT *, SUM(if(biblio_copy.status_cd != 'out', 1, 0)) AS copy_free FROM biblio LEFT JOIN biblio_copy ON biblio.bibid = biblio_copy.bibid WHERE MATCH(title, author) AGAINST ('" . $text . "*' IN BOOLEAN MODE) GROUP BY biblio.bibid ORDER BY biblio.bibid DESC");
-            $stm->execute(array($text));
+            $stm = $this->db->prepare("SELECT *, SUM(IF($this->biblio_copy_table.status_cd != 'out', 1, 0)) AS copy_free FROM $this->biblio_table LEFT JOIN $this->biblio_copy_table ON $this->biblio_table.bibid = $this->biblio_copy_table.bibid WHERE MATCH(title, author) AGAINST (:text IN BOOLEAN MODE) GROUP BY $this->biblio_table.bibid ORDER BY $this->biblio_table.bibid DESC");
+            $stm->bindParam(":text", $text);
+            $stm->execute();
 
             $this->response->setResponse(true);
             $this->response->result = $stm->fetchall();
-
             return $this->response;
-        }
-        catch(Exception $e)
-        {
+
+        } catch(Exception $e) {
             $this->response->setResponse(false, $e->getMessage());
             return $this->response;
-        }  
+        }
     }
-
 }

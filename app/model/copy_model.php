@@ -20,12 +20,15 @@ Enconces envio la información de la copia
 */
 
 // Básicamente un copy paste de la clase Copy del sistema original. Algún día habría que fusionarla con CopyModel, representan lo mismo.
-class Copy{
+class Copy {
  
     // database connection and table name
     private $conn;
     private $db;
-    private $table_name = "biblio_copy";
+    private $biblio_table = "biblio";
+    private $biblio_copy_table = "biblio_copy";
+    private $checkout_privs_table = "checkout_privs";
+    private $member_table = "member";
  
     // object properties
     public $bibid;
@@ -35,9 +38,20 @@ class Copy{
     public $renewal_count;
     public $days_late;
     public $due_back_dt;
+    public $renewalLimit;
+    public $mbrid;
+    public $classification;
+    public $renewable;
+    public $status;
     //public $category_id;
     //public $category_name;
     //public $created;
+    // constructor with $db as database connection
+    public function __construct(){
+        //$this->conn = $db;
+        $this->db = Database::StartUp();
+    }
+
     function bibid() {
         return $this->bibid;
     }
@@ -58,7 +72,33 @@ class Copy{
         return $this->due_back_dt;
     }
 
+    function renewalLimit() {
+        return $this->renewalLimit;
+    }
 
+    function mbrid() {
+        return $this->mbrid;
+    }
+
+    function classification() {
+        return $this->classification;
+    }
+
+    function title() {
+        return $this->title;
+    }
+
+    function author() {
+        return $this->author;
+    }
+
+    function renewable() {
+        return $this->renewable;
+    }
+
+    function status() {
+        return $this->status;
+    }
 
     function setBibid($value) {
         $this->bibid = $value;
@@ -80,181 +120,288 @@ class Copy{
         $this->due_back_dt = $value;
     }
 
-    public function update() {
-
-        $sql = "UPDATE $this->table_name SET 
-                            renewal_count   = ?, 
-                            due_back_dt     = ?
-                        WHERE copyid = ?";
-
-                $this->db->prepare($sql)
-                     ->execute(
-                        array(
-                            $this->renewalCount(), 
-                            $this->dueBackDt(),
-                            $this->copyid()
-                        )
-                    );
+    function setRenewalLimit($value) {
+        $this->renewalLimit = $value;
     }
- 
- 
-    // constructor with $db as database connection
-    public function __construct(){
-        //$this->conn = $db;
-        $this->db = Database::StartUp();
+
+    function setMbrid($value) {
+        $this->mbrid = $value;
+    }
+
+    function setTitle($value) {
+        $this->title = $value;
+    }
+
+    function setAuthor($value) {
+        $this->author = $value;
+    }
+
+    function setClassification($value) {
+        $this->classification = $value;
+    }
+
+    function setRenewable($value) {
+        $this->renewable = $value;
+    }
+
+    function setStatus($value) {
+        $this->status = $value;
+    }
+
+    public function update() {
+        $sql = "UPDATE $this->biblio_copy_table SET renewal_count = ?, due_back_dt = ? WHERE copyid = ? AND bibid = ?";
+        $this->db->prepare($sql)->execute(array($this->renewalCount(), $this->dueBackDt(), $this->copyid(), $this->bibid()));
+    }
+
+    public function findClassification() {
+        try {
+            $stm = $this->db->prepare("SELECT classification FROM $this->member_table WHERE mbrid = $this->mbrid");
+            $stm->execute();
+            $classification = $stm->fetch()->classification;
+            return $classification;
+
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
+    }
+
+    public function findRenewalLimit() {
+        try {
+            $stm = $this->db->prepare("SELECT 
+                $this->checkout_privs_table.renewal_limit
+                FROM $this->biblio_copy_table
+                LEFT JOIN $this->biblio_table ON $this->biblio_table.bibid = $this->biblio_copy_table.bibid
+                LEFT JOIN $this->checkout_privs_table ON $this->biblio_table.material_cd = $this->checkout_privs_table.material_cd
+                WHERE $this->biblio_copy_table.copyid = :copyid
+                AND $this->biblio_copy_table.bibid = :bibid
+                AND $this->checkout_privs_table.classification = :classification");
+            $stm->execute(array(":copyid" => $this->copyid, ":bibid" => $this->bibid, ":classification" => $this->classification));
+            $renewal_limit = $stm->fetch()->renewal_limit;
+            return $renewal_limit;
+
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
     }
 }
 
-
-class CopyModel
-{
+class CopyModel {
     private $db;
-    //private $table = 'biblio';
+    private $biblio_table = "biblio";
+    private $biblio_copy_table = "biblio_copy";
+    private $checkout_privs_table = "checkout_privs";
     private $response;
 
-    public function __CONSTRUCT()
-    {
+    public function __construct() {
         $this->db = Database::StartUp();
         $this->response = new Response();
     }
 
     public function getCopiesbyBibid($bibid) {
-
-            $stm = $this->db->prepare("select biblio_copy.* ,greatest(0,to_days(sysdate()) - to_days(biblio_copy.due_back_dt)) days_late from biblio_copy where biblio_copy.bibid = " . $bibid);
-
-            $stm->execute(array($bibid));
-
+        try {
+            $stm = $this->db->prepare("SELECT $this->biblio_copy_table.*, greatest(0,to_days(sysdate()) - to_days($this->biblio_copy_table.due_back_dt)) days_late FROM $this->biblio_copy_table WHERE $this->biblio_copy_table.bibid = :bibid");
+            $stm->bindParam(":bibid", $bibid);
+            $stm->execute();
             return $stm;
+
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
     }
 
     public function getCopiesByMbrid($mbrid) {
+        try {
             //Busca todas las copias por mbrid
-            $stm = $this->db->prepare("SELECT biblio.*,biblio_copy.copyid ,biblio_copy.barcode_nmbr ,biblio_copy.status_cd ,biblio_copy.status_begin_dt ,biblio_copy.due_back_dt ,biblio_copy.mbrid ,biblio_copy.renewal_count ,greatest(0,to_days(sysdate()) - to_days(biblio_copy.due_back_dt)) days_late FROM biblio, biblio_copy WHERE biblio.bibid = biblio_copy.bibid AND biblio_copy.mbrid =" . $mbrid . " AND biblio_copy.status_cd='out' ORDER BY biblio_copy.status_begin_dt desc");
-
-            $stm->execute(array($mbrid));
-
+            $stm = $this->db->prepare("SELECT $this->biblio_table.*, $this->biblio_copy_table.copyid ,$this->biblio_copy_table.barcode_nmbr, $this->biblio_copy_table.status_cd, $this->biblio_copy_table.status_begin_dt, $this->biblio_copy_table.due_back_dt, $this->biblio_copy_table.mbrid, $this->biblio_copy_table.renewal_count, greatest(0,to_days(sysdate()) - to_days($this->biblio_copy_table.due_back_dt)) days_late FROM $this->biblio_table, $this->biblio_copy_table WHERE $this->biblio_table.bibid = $this->biblio_copy_table.bibid AND $this->biblio_copy_table.mbrid = :mbrid AND $this->biblio_copy_table.status_cd='out' ORDER BY $this->biblio_copy_table.status_begin_dt desc");
+            $stm->bindParam(":mbrid", $mbrid);
+            $stm->execute();
             return $stm;
+        
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
     }
 
-    public function getCopy($copyid) {
+    public function getCopy($bibid, $copyid) {
+        try {
             //Devuelve la copia por copyid
-            $stm = $this->db->prepare("select biblio_copy.*, greatest(0,to_days(sysdate()) - to_days(biblio_copy.due_back_dt)) days_late from biblio_copy where biblio_copy.copyid = " . $copyid);
-            
-            $stm->execute(array($copyid));
-
+            $stm = $this->db->prepare("SELECT 
+                $this->biblio_copy_table.*, 
+                greatest(0,to_days(sysdate()) - to_days($this->biblio_copy_table.due_back_dt)) AS days_late
+                FROM $this->biblio_copy_table 
+                WHERE $this->biblio_copy_table.copyid = :copyid
+                AND $this->biblio_copy_table.bibid = :bibid");
+            $stm->execute(array(":copyid" => $copyid, ":bibid" => $bibid));
             return $stm;
+
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
     }
 
     public function getDaysDueBack($copy, $_date) {
-
+        try {
             $book = new BookModel();
             //Busco los días de prestamo para ese libro
             $days_due_back = $book->getCollectionInfo($copy->bibid());
             //Check for a date. If it is null use the current date. 
             if (is_null($_date)) {
-              $date = date('Y-m-d');
+                $date = date('Y-m-d');
             } else {
-              $date = $_date;
+                $date = $_date;
             }
             //El préstamo es por días habiles. Reviso día a día si es fin de semana, si lo es sumo un día al préstamo.
-            for ($i=0; $i<$days_due_back; $i++) {
-              $date = Date::addDays($date, 1);
-              if (Date::isWeekend($date)) {
-                $days_due_back++;
-              }
+            for ($i = 0; $i < $days_due_back; $i++) {
+                $date = Date::addDays($date, 1);
+                if (Date::isWeekend($date)) {
+                    $days_due_back++;
+                }
             }
-
             return $days_due_back;
+
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
         }
+    }
 
+    public function get($mbrid, $reqStatus) {
+        try {
+            $result = array();
 
-    public function Get($mbrid, $reqStatus)
-    {
-        try
-        {
-                $result = array();
+            $stm = $this->getCopiesByMbrid($mbrid);           
+            // products array
+            $copy_arr = array();
+            //$copy_arr["copy"]=array();
+            
+            // retrieve our table contents
+            // fetch() is faster than fetchAll()
+            // http://stackoverflow.com/questions/2770630/pdofetchall-vs-pdofetch-in-a-loop
+            while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+                // extract row
+                // this will make $row['name'] to
+                // just $name only
+                extract($row);
+                /*
+                $copy_item=array(
+                    "bibid" => $bibid,
+                    "title" => $title,
+                    "copyid" => $copyid,
+                    "author" => $author,
+                    "due_back_dt" => $due_back_dt,
+                    "days_late" => $days_late,
+                    "renew" => "",
+                    "status" => ""
+                );
+                */
+                $copy = new Copy();
+                $copy->setCopyid($copyid);
+                $copy->setBibid($bibid);
+                $copy->setDueBackDt($due_back_dt);
+                $copy->setRenewalCount($renewal_count);
+                $copy->setDaysLate($days_late);
+                $copy->setMbrid($mbrid);
+                $copy->setAuthor($author);
+                $copy->setTitle($title);
+                $copy->setClassification($copy->findClassification());
+                $copy->setRenewalLimit($copy->findRenewalLimit());
+                
+                $renewalModel = new RenewalModel();
+                $renewalcheck = $renewalModel->checkRenewal($copy, $this);
 
-                $stm = $this->getCopiesByMbrid($mbrid);           
-                // products array
-                $copy_arr=array();
-                //$copy_arr["copy"]=array();
-             
-                // retrieve our table contents
-                // fetch() is faster than fetchAll()
-                // http://stackoverflow.com/questions/2770630/pdofetchall-vs-pdofetch-in-a-loop
-                while ($row = $stm->fetch(PDO::FETCH_ASSOC)){
-                    // extract row
-                    // this will make $row['name'] to
-                    // just $name only
-                    extract($row);
-
-                    $copy_item=array(
-                        "bibid" => $bibid,
-                        "title" => $title,
-                        "copyid" => $copyid,
-                        "author" => $author,
-                        "due_back_dt" => $due_back_dt,
-                        "days_late" => $days_late,
-                        "renew" => "",
-                        "status" => ""
-                    );
-
-                    // Mucho código repetido con respecto Renew de RenewalModel.
-                    // Quizá esto podría ser un método de una clase estática o una función
-                    // En RenewalModel está comentado
-                    $renewal_count_copy = $renewal_count;
-                    $days_late_copy = $days_late;
-
-                    $hold = new HoldModel();
-                    $holdstm = $hold->getHolds($bibid, $copyid);
-                    $holdnum = $holdstm->rowCount();
-
-                    $bibstm = $this->getCopiesbyBibid($bibid);
-                    $bibnum = $bibstm->rowCount();
-                    $copiesIn = 0;
-
-                    while ($bibrow = $bibstm->fetch(PDO::FETCH_ASSOC)) {
-                        extract($bibrow);
-                        if ($due_back_dt == "") {
-                          $copiesIn++;
-                        }
-                    }
-
-                    if ($renewal_count_copy==0 and $copiesIn!=0 and $bibnum>0 and $days_late_copy==0 and $holdnum==0) {
-                        $renew = true;
-                        $status = "Renovable";
+                if ($renewalcheck) {
+                    $copy->setRenewable(true);
+                    $copy->setStatus("Renovable");
+                } else {
+                    $copy->setRenewable(false);
+                    if ($copy->daysLate() > 0) {
+                        $copy->setStatus("Vencido");
                     } else {
-                        $renew = false;
-                        if ($days_late_copy > 0) {
-                            $status = "Vencido";
-                        } else {
-                            $status = "No renovable";
-                        }
+                        $copy->setStatus("No renovable");
                     }
-                    
-                    $copy_item["renew"] = $renew;
-                    $copy_item["status"] = $status;
+                }
+                
+                // Mucho código repetido con respecto Renew de RenewalModel.
+                // Quizá esto podría ser un método de una clase estática o una función
+                // En RenewalModel está comentado
+                //$renewal_count_copy = $renewal_count;
+                //$days_late_copy = $days_late;
+                /*
+                $hold = new HoldModel();
+                $holdstm = $hold->getHolds($bibid, $copyid);
+                $holdnum = $holdstm->rowCount();
+                
+                $bibstm = $this->getCopiesbyBibid($bibid);
+                $bibnum = $bibstm->rowCount();
+                $copiesIn = 0;
 
-                    if ($reqStatus == $status or $reqStatus == "Todos" or $reqStatus == null) {
-                        array_push($copy_arr, $copy_item);
+                while ($bibrow = $bibstm->fetch(PDO::FETCH_ASSOC)) {
+                    extract($bibrow);
+                    if ($due_back_dt == "") {
+                        $copiesIn++;
                     }
                 }
 
+                if ($renewal_count_copy==0 and $copiesIn!=0 and $bibnum>0 and $days_late_copy==0 and $holdnum==0) {
+                    $renew = true;
+                    $status = "Renovable";
+                } else {
+                    $renew = false;
+                    if ($days_late_copy > 0) {
+                        $status = "Vencido";
+                    } else {
+                        $status = "No renovable";
+                    }
+                }*/
+                
+                //$copy_item["renew"] = $renew;
+                //$copy_item["status"] = $status;
+
+                if ($reqStatus == $copy->status() or $reqStatus == "Todos" or $reqStatus == null) {
+                    array_push($copy_arr, $copy);
+                }
+            }
+
             $this->response->setResponse(true);
             $this->response->result = $copy_arr;
-
             return $this->response;
-        }
-        catch(Exception $e)
-        {
+    
+        } catch(Exception $e) {
             $this->response->setResponse(false, $e->getMessage());
             return $this->response;
-        }  
+        }
+    }
+
+    public function hasReachedRenewalLimit($copy) {
+        if($copy->renewalLimit() == 0) {
+            //0 = unlimited
+            return FALSE;
+        }
+        if($copy->renewalCount()/24 < $copy->renewalLimit()) {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
     }
 }
 /*
 
 SELECT biblio.*,biblio_copy.copyid ,biblio_copy.barcode_nmbr ,biblio_copy.status_cd ,biblio_copy.status_begin_dt ,biblio_copy.due_back_dt ,biblio_copy.mbrid ,biblio_copy.renewal_count ,greatest(0,to_days(sysdate()) - to_days(biblio_copy.due_back_dt)) days_late FROM biblio, biblio_copy WHERE biblio.bibid = biblio_copy.bibid AND biblio_copy.mbrid = 2719 AND biblio_copy.status_cd='out' ORDER BY biblio_copy.status_begin_dt desc
+
+
+            $stm = $this->db->prepare("SELECT $this->biblio_copy_table.*, 
+                greatest(0,to_days(sysdate()) - to_days($this->biblio_copy_table.due_back_dt)) AS days_late,
+                $this->checkout_privs_table.renewal_limit
+                FROM $this->biblio_copy_table 
+                LEFT JOIN $this->biblio_table ON $this->biblio_copy_table.bibid = $this->biblio_table.bibid
+                LEFT JOIN $this->checkout_privs_table ON $this->biblio_table.material_cd = $this->checkout_privs_table.material_cd
+                WHERE $this->biblio_copy_table.copyid = :copyid
+                AND $this->biblio_table.bibid = :bibid");
 
 */
 

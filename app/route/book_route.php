@@ -4,12 +4,6 @@ use App\Model\BookModel;
 
 $app->group('/book/', function () {
 
-    $this->get('test', function ($req, $res, $args) {
-
-        return $res->getBody()
-                   ->write('Hello Users');
-    });
-
     $this->get('getAll', function ($req, $res, $args) {
         $um = new BookModel();
 
@@ -18,25 +12,17 @@ $app->group('/book/', function () {
            ->getBody()
            ->write(
             json_encode(
-                $um->GetAll(),JSON_UNESCAPED_UNICODE
+                $um->getAll(),JSON_UNESCAPED_UNICODE
             )
         );
     });
 
     $this->get('get/{id}', function ($req, $res, $args) {
         $um = new BookModel();
-/*
-        return $res
-           ->withHeader('Content-type', 'application/json')
-           ->getBody()
-           ->write(
-            json_encode(
-                $um->Get($args['id']),JSON_UNESCAPED_UNICODE
-            )
-        );*/
-
-        return $res->withJson($um->Get($args['id']), 200);
+        return $res->withJson($um->get($args['id']), 200);
     });
+});
+
 
 /*
     $this->post('save', function ($req, $res) {
@@ -67,4 +53,14 @@ $app->group('/book/', function () {
         );
     });
 */
-});
+
+/*
+        return $res
+           ->withHeader('Content-type', 'application/json')
+           ->getBody()
+           ->write(
+            json_encode(
+                $um->Get($args['id']),JSON_UNESCAPED_UNICODE
+            )
+        );*/
+
