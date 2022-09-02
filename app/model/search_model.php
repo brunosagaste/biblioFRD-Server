@@ -18,9 +18,17 @@ class SearchModel {
 
     public function search($text) {
         try {
-            $text = $text."*";
             $result = array();
-            $stm = $this->db->prepare("SELECT *, SUM(IF($this->biblio_copy_table.status_cd != 'out', 1, 0)) AS copy_free FROM $this->biblio_table LEFT JOIN $this->biblio_copy_table ON $this->biblio_table.bibid = $this->biblio_copy_table.bibid WHERE MATCH(title, author) AGAINST (:text IN BOOLEAN MODE) GROUP BY $this->biblio_table.bibid ORDER BY $this->biblio_table.bibid DESC");
+            $stm = $this->db->prepare("SELECT 
+                *, 
+                SUM(IF($this->biblio_copy_table.status_cd != 'out', 1, 0)) AS copy_free,
+                MATCH(`title`, `author`) AGAINST(:text IN NATURAL LANGUAGE MODE) AS bibidorder
+                FROM $this->biblio_table 
+                LEFT JOIN $this->biblio_copy_table 
+                ON $this->biblio_table.bibid = $this->biblio_copy_table.bibid 
+                WHERE MATCH(title, author) AGAINST (:text IN NATURAL LANGUAGE MODE) 
+                GROUP BY $this->biblio_table.bibid
+                ORDER BY bibidorder DESC");
             $stm->bindParam(":text", $text);
             $stm->execute();
 

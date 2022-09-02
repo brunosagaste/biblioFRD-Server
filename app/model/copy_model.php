@@ -48,7 +48,6 @@ class Copy {
     //public $created;
     // constructor with $db as database connection
     public function __construct(){
-        //$this->conn = $db;
         $this->db = Database::StartUp();
     }
 
@@ -275,30 +274,14 @@ class CopyModel {
             $result = array();
 
             $stm = $this->getCopiesByMbrid($mbrid);           
-            // products array
             $copy_arr = array();
-            //$copy_arr["copy"]=array();
             
             // retrieve our table contents
             // fetch() is faster than fetchAll()
             // http://stackoverflow.com/questions/2770630/pdofetchall-vs-pdofetch-in-a-loop
             while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-                // extract row
-                // this will make $row['name'] to
-                // just $name only
+
                 extract($row);
-                /*
-                $copy_item=array(
-                    "bibid" => $bibid,
-                    "title" => $title,
-                    "copyid" => $copyid,
-                    "author" => $author,
-                    "due_back_dt" => $due_back_dt,
-                    "days_late" => $days_late,
-                    "renew" => "",
-                    "status" => ""
-                );
-                */
                 $copy = new Copy();
                 $copy->setCopyid($copyid);
                 $copy->setBibid($bibid);
@@ -326,42 +309,6 @@ class CopyModel {
                     }
                 }
                 
-                // Mucho código repetido con respecto Renew de RenewalModel.
-                // Quizá esto podría ser un método de una clase estática o una función
-                // En RenewalModel está comentado
-                //$renewal_count_copy = $renewal_count;
-                //$days_late_copy = $days_late;
-                /*
-                $hold = new HoldModel();
-                $holdstm = $hold->getHolds($bibid, $copyid);
-                $holdnum = $holdstm->rowCount();
-                
-                $bibstm = $this->getCopiesbyBibid($bibid);
-                $bibnum = $bibstm->rowCount();
-                $copiesIn = 0;
-
-                while ($bibrow = $bibstm->fetch(PDO::FETCH_ASSOC)) {
-                    extract($bibrow);
-                    if ($due_back_dt == "") {
-                        $copiesIn++;
-                    }
-                }
-
-                if ($renewal_count_copy==0 and $copiesIn!=0 and $bibnum>0 and $days_late_copy==0 and $holdnum==0) {
-                    $renew = true;
-                    $status = "Renovable";
-                } else {
-                    $renew = false;
-                    if ($days_late_copy > 0) {
-                        $status = "Vencido";
-                    } else {
-                        $status = "No renovable";
-                    }
-                }*/
-                
-                //$copy_item["renew"] = $renew;
-                //$copy_item["status"] = $status;
-
                 if ($reqStatus == $copy->status() or $reqStatus == "Todos" or $reqStatus == null) {
                     array_push($copy_arr, $copy);
                 }
@@ -403,26 +350,4 @@ SELECT biblio.*,biblio_copy.copyid ,biblio_copy.barcode_nmbr ,biblio_copy.status
                 WHERE $this->biblio_copy_table.copyid = :copyid
                 AND $this->biblio_table.bibid = :bibid");
 
-*/
-
-/*
-Pruebas:
-
-Aceptacion
-Instalacion
-Alfa y beta
-Conformidad
-Regresion
-
-Rendimiento
-Desgaste
-Configuracion
-Usabilidad
-
-Integracion:
-Big bang
-Ascendente
-Descendente
-De regresion
-De humo
 */

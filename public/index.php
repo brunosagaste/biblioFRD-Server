@@ -42,7 +42,7 @@ $routes = require __DIR__ . '/../src/routes.php';
 $routes($app);
 
 // Register my app
-require($_SERVER['DOCUMENT_ROOT']. '/biblioteca/app/app_loader.php');
+require($_SERVER['DOCUMENT_ROOT']. '/biblioFRD-Server/app/app_loader.php');
 
 // Run app
 $app->run();

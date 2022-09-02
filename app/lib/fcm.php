@@ -42,7 +42,7 @@ class FCM {
     // function makes curl request to firebase servers
     private function sendPushNotification($fields) {
 
-        $settings = require 'C:\wamp64\www\biblioteca\src\settings.php';
+        $settings = require dirname(__DIR__) . '/../src/settings.php';
         $app = new \Slim\App($settings);
         $container = $app->getContainer();
         $firebase_key = $container->get('settings')['firebase']['firebase_secret'];
@@ -65,7 +65,6 @@ class FCM {
  
         // Disabling SSL Certificate support temporarly
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        var_dump($fields);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
  
         // Execute post

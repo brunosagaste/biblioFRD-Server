@@ -13,12 +13,11 @@ class Notification {
         $firebase = new FCM();
 		$push = new Push();
 		$regidMan = new RegIDManager();
-
 		$regidstm =  $regidMan->getOverdueRegids();
 
 		if ($regidstm->rowCount()==0) {
-                throw new apiError('No hay notificaciones para enviar');
-            }
+            throw new apiError('No hay notificaciones para enviar');
+        }
 
         $json = '';
 		$response = '';
@@ -43,32 +42,7 @@ class Notification {
                 array_push($arrayResponse, $response);
             }
         }
-
         
-
-
-		//$title = 'Hola';
-		//$message = 'Crack';
-
-		//$regId = 'fSbaUYGoSGScTRZA8BLDLI:APA91bEw0lu--R6mFPPoBxxBNqgfu2lPb6Cbrr0DL5q5GVMi4XtBkVlADkw9MNAu7ch701x4rI5rFPM009mpMAztUuZS20xDraqs6qlJnkbgIGJxwzSEhY0r_i0diY5g1DWb3kyfionq';
-
-		//$push->setTitle($title);
-		//$push->setMessage($message);
-		//$push->setIsBackground(FALSE);
-
-		//$push_type = 'individual';
-
-		//$json = '';
-		//$response = '';
-
-		//if ($push_type == 'topic') {
-		//    $json = $push->getPush();
-		//    $response = $firebase->sendToTopic('global', $json);
-		//} else if ($push_type == 'individual') {
-		//    $json = $push->getPush();
-		//    $response = $firebase->send($regId, $json);
-		//    //var_dump($response);
-		//}
 		return $arrayResponse;
     }
 }

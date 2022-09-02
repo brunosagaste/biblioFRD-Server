@@ -30,7 +30,7 @@ return [
 
         // Key para enviar notificaciones. No hacer un commit a Github ni compartir.
         "firebase" => [
-            'firebase_secret' => 'otraclavemasquenodebeterminarengithub'
+            'firebase_secret' => 'supersecretkeyyoushouldnotcommittogithub'
         ],
 
     ],

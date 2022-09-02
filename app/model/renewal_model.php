@@ -18,27 +18,6 @@ Después verifico que no esté reservada
 Entonces renuevo
 */
 
-class Renewal {
- 
-    // database connection and table name
-    private $conn;
-    private $table_name = "biblio_copy";
-
-    // object properties
-    public $bibid;
-    public $title;
-    public $author;
-    public $copyid;
-    //public $category_id;
-    //public $category_name;
-    //public $created;
- 
-    // constructor with $db as database connection
-    public function __construct($db) {
-        $this->conn = $db;
-    }
-}
-
 class RenewalModel {
     private $db;
     //private $table = 'biblio';
@@ -101,27 +80,7 @@ class RenewalModel {
             } else {
                 throw new apiError('Esta copia no puede ser renovada');
             }
-            /*
-            $hold = new HoldModel();
-            $holdstm = $hold->getHolds($bibid, $copyid);
-            $holdnum = $holdstm->rowCount();
-            $bibstm = $copy->getCopiesByBibid($bibid);
-            $bibnum = $bibstm->rowCount();
-            $copiesIn = 0;
 
-            while ($bibrow = $bibstm->fetch(PDO::FETCH_ASSOC)) {
-                extract($bibrow);
-                if ($due_back_dt == "") {
-                    $copiesIn++;
-                }
-            }
-
-            $reachedLimit = $copy->hasReachedRenewalLimit($mbrid, $copyObj);
-            if (!$reachedLimit and $copiesIn != 0 and $bibnum > 1 and $copyObj->daysLate() == 0 and $holdnum == 0) {
-                $copyObj = $this->updateRenewalDate($copyObj);
-            } else {
-                throw new apiError('Esta copia no puede ser renovada');
-            }*/
             //Respondo
             $this->response->setResponse(true);
             $this->response->result = ['message' => "Copia renovada", "date" => $copy->dueBackDt()];
@@ -155,7 +114,7 @@ class RenewalModel {
             $reachedLimit = $copy_model->hasReachedRenewalLimit($copy);
             //Verifico si la copia se puede prestar
             if (!$reachedLimit and $copiesIn != 0 and $bibnum > 1 and $copy->daysLate() == 0 and $holdnum == 0) {
-                //Renuevo por dos días hábiles
+                //Renuevo
                 return True;
             } else {
                 return False;

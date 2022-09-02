@@ -5,7 +5,7 @@ use Slim\App;
 return function (App $app) {
     // e.g: $app->add(new \Slim\Csrf\Guard);
     $app->add(new Slim\Middleware\JwtAuthentication([
-    "path" => ["/api", "/copy", "/hold", "/renewal", "/regid", "/password"],
+    "path" => ["/api", "/copy", "/hold", "/renewal", "/regid", "/password", "/search"],
     "secure" => false,
     "attribute" => "decoded_token_data",
     "secret" => "supersecretkeyyoushouldnotcommittogithub",

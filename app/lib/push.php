@@ -20,7 +20,6 @@ class Push {
     private $is_background;
  
     function __construct() {
-         
     }
  
     public function setTitle($title) {
@@ -47,10 +46,7 @@ class Push {
         $not = array();
         $not['title'] = $this->title;
         $not['body'] = $this->message;
-        //$res['data']['message'] = $this->message;
-        //$res['data']['image'] = $this->image;
-        //$res['data']['payload'] = $this->data;
-        //$res['data']['timestamp'] = date('Y-m-d G:i:s');
+
         return $not;
     }
  

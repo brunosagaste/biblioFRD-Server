@@ -1,5 +1,5 @@
 <?php
-$base = $_SERVER['DOCUMENT_ROOT'] . '/biblioteca/app/';
+$base = $_SERVER['DOCUMENT_ROOT'] . '/biblioFRD-Server/app/';
 
 $folders = [
 	'handlers',
@@ -9,10 +9,8 @@ $folders = [
     'service'
 ];
 
-foreach($folders as $f)
-{
-    foreach (glob($base . "$f/*.php") as $filename)
-    {
+foreach($folders as $f) {
+    foreach (glob($base . "$f/*.php") as $filename) {
         require $filename;
     }
 }
