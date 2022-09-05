@@ -17,8 +17,8 @@ $app->post('/send', function (Request $req, Response $res, array $args) {
         return $this->response->withJson(['error' => true, 'status' => 400, 'message' => 'Missing or invalid token', 'developerMessage' => 'Missing token'], 400); 
     }
 
-    if ($ipAddress != '::1') { //Si nos preguntás por qué ::1 es localhost, todavía lo estamos averiguando
-        return $this->response->withJson(['error' => true, 'status' => 400, 'message' => 'Not a local request', 'developerMessage' => 'Not local request'], 400); 
+    if ($ipAddress != '::1' and $ipAddress != '127.0.0.1') { //Si nos preguntás por qué ::1 es localhost, todavía lo estamos averiguando
+        return $this->response->withJson(['error' => true, 'status' => 400, 'message' => 'Not a local request', 'developerMessage' => 'Not a local request'], 400); 
     }
 
     if (!isset($input['type'])) {
