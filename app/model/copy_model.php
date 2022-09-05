@@ -43,6 +43,7 @@ class Copy {
     public $classification;
     public $renewable;
     public $status;
+    public $loan_begin_dt;
     //public $category_id;
     //public $category_name;
     //public $created;
@@ -99,6 +100,10 @@ class Copy {
         return $this->status;
     }
 
+    function loanBeginDt($value) {
+        return $this->loan_begin_dt;
+    }
+
     function setBibid($value) {
         $this->bibid = $value;
     }
@@ -145,6 +150,10 @@ class Copy {
 
     function setStatus($value) {
         $this->status = $value;
+    }
+
+    function setLoanBeginDt($value) {
+        $this->loan_begin_dt = $value;
     }
 
     public function update() {
@@ -293,6 +302,7 @@ class CopyModel {
                 $copy->setTitle($title);
                 $copy->setClassification($copy->findClassification());
                 $copy->setRenewalLimit($copy->findRenewalLimit());
+                $copy->setLoanBeginDt($status_begin_dt);
                 
                 $renewalModel = new RenewalModel();
                 $renewalcheck = $renewalModel->checkRenewal($copy, $this);

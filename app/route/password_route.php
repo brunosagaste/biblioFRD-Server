@@ -29,6 +29,7 @@ function checkPass($pass_user, $form_newpw, $form_newpwconfirm, $form_actualpw) 
 	$error = false;
 	$message = "Contraseña actualizada con éxito";
 	$status = 200;
+    $field = "";
 
 	//Los mensajes de error están ordenados de tal forma de que siempre se muestre el mas 'grave' de todos. 
 	//No tiene sentido que el error que llegue sea que la clave no tiene un número, si la clave que eligió está vacía, o si se equivocó en la actual.
@@ -46,9 +47,21 @@ function checkPass($pass_user, $form_newpw, $form_newpwconfirm, $form_actualpw) 
         $field = "newpw";
     }
 
-    if (!preg_match("#[a-zA-Z]+#", $form_newpw)) {
+    if (!preg_match("#.*[a-zA-Z].*#", $form_newpw)) {
     	$error = true;
         $message = "La contraseña debe tener al menos una letra";
+        $field = "newpw";
+    }
+
+    if (!preg_match("#.*[A-Z].*#", $form_newpw) and !$error) {
+    	$error = true;
+        $message = "La contraseña debe tener al menos una mayúscula";
+        $field = "newpw";
+    }
+
+    if (!preg_match("#[^A-Za-z0-9]#", $form_newpw)) {
+    	$error = true;
+        $message = "La contraseña debe tener al menos un caracter especial";
         $field = "newpw";
     }
 

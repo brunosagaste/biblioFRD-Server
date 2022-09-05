@@ -20,8 +20,9 @@ class SearchModel {
         try {
             $result = array();
             $stm = $this->db->prepare("SELECT 
-                *, 
+                $this->biblio_table.*,
                 SUM(IF($this->biblio_copy_table.status_cd != 'out', 1, 0)) AS copy_free,
+                IF(IF($this->biblio_copy_table.status_cd != 'out', 1, 0) = 0, MIN(`due_back_dt`), null) AS due_back_dt,
                 MATCH(`title`, `author`) AGAINST(:text IN NATURAL LANGUAGE MODE) AS bibidorder
                 FROM $this->biblio_table 
                 LEFT JOIN $this->biblio_copy_table 
