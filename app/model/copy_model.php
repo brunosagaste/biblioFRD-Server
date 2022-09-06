@@ -41,12 +41,11 @@ class Copy {
     public $renewalLimit;
     public $mbrid;
     public $classification;
-    public $renewable;
+    public $renewable_cause;
     public $status;
     public $loan_begin_dt;
-    //public $category_id;
-    //public $category_name;
-    //public $created;
+    public $filter;
+
     // constructor with $db as database connection
     public function __construct(){
         $this->db = Database::StartUp();
@@ -92,8 +91,8 @@ class Copy {
         return $this->author;
     }
 
-    function renewable() {
-        return $this->renewable;
+    function renewableCause() {
+        return $this->renewable_cause;
     }
 
     function status() {
@@ -102,6 +101,10 @@ class Copy {
 
     function loanBeginDt($value) {
         return $this->loan_begin_dt;
+    }
+
+    function filter() {
+        return $this->filter;
     }
 
     function setBibid($value) {
@@ -144,8 +147,8 @@ class Copy {
         $this->classification = $value;
     }
 
-    function setRenewable($value) {
-        $this->renewable = $value;
+    function setRenewableCause($value) {
+        $this->renewable_cause = $value;
     }
 
     function setStatus($value) {
@@ -156,11 +159,16 @@ class Copy {
         $this->loan_begin_dt = $value;
     }
 
+    function setFilter($value) {
+        $this->filter = $value;
+    }
+
     public function update() {
         $sql = "UPDATE $this->biblio_copy_table SET renewal_count = ?, due_back_dt = ? WHERE copyid = ? AND bibid = ?";
         $this->db->prepare($sql)->execute(array($this->renewalCount(), $this->dueBackDt(), $this->copyid(), $this->bibid()));
     }
 
+    //Busca el tipo de material
     public function findClassification() {
         try {
             $stm = $this->db->prepare("SELECT classification FROM $this->member_table WHERE mbrid = $this->mbrid");
@@ -174,6 +182,7 @@ class Copy {
         }
     }
 
+    //Busca por cuántos días se puede renovar según la carrera y el tipo de material
     public function findRenewalLimit() {
         try {
             $stm = $this->db->prepare("SELECT 
@@ -187,6 +196,27 @@ class Copy {
             $stm->execute(array(":copyid" => $this->copyid, ":bibid" => $this->bibid, ":classification" => $this->classification));
             $renewal_limit = $stm->fetch()->renewal_limit;
             return $renewal_limit;
+
+        } catch(Exception $e) {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
+    }
+
+    //Busca cuántos días antes del vencimiento del préstamo se puede renovar según la carrera y el tipo de material
+    public function findRenewalDelta() {
+        try {
+            $stm = $this->db->prepare("SELECT 
+                $this->checkout_privs_table.renewal_delta
+                FROM $this->biblio_copy_table
+                LEFT JOIN $this->biblio_table ON $this->biblio_table.bibid = $this->biblio_copy_table.bibid
+                LEFT JOIN $this->checkout_privs_table ON $this->biblio_table.material_cd = $this->checkout_privs_table.material_cd
+                WHERE $this->biblio_copy_table.copyid = :copyid
+                AND $this->biblio_copy_table.bibid = :bibid
+                AND $this->checkout_privs_table.classification = :classification");
+            $stm->execute(array(":copyid" => $this->copyid, ":bibid" => $this->bibid, ":classification" => $this->classification));
+            $renewal_delta = $stm->fetch()->renewal_delta;
+            return $renewal_delta;
 
         } catch(Exception $e) {
             $this->response->setResponse(false, $e->getMessage());
@@ -307,19 +337,30 @@ class CopyModel {
                 $renewalModel = new RenewalModel();
                 $renewalcheck = $renewalModel->checkRenewal($copy, $this);
 
-                if ($renewalcheck) {
-                    $copy->setRenewable(true);
+                if ($renewalcheck['result']) {
+                    //Podemos renovar
+                    $copy->setRenewableCause($renewalcheck['cause']);
                     $copy->setStatus("Renovable");
+                    $copy->setFilter("renewable");
                 } else {
-                    $copy->setRenewable(false);
-                    if ($copy->daysLate() > 0) {
+                    //No podemos renovar
+                    $copy->setRenewableCause($renewalcheck['cause']);
+                    $copy->setFilter("nonrenewable");
+                    if ($renewalcheck['cause'] == "overdue") {
+                        //No podemos renovar por estar vencido
                         $copy->setStatus("Vencido");
+                        $copy->setRenewableCause("overdue");
+                        $copy->setFilter("overdue");
+                    } elseif ($renewalcheck['cause'] == 'date') {
+                        //No podemos renovar por estar fuera de fecha
+                        $copy->setStatus("Renovable a partir del " . $renewalcheck['dateavailable']);
                     } else {
+                        //No podemos renovar por otra cosa
                         $copy->setStatus("No renovable");
                     }
                 }
                 
-                if ($reqStatus == $copy->status() or $reqStatus == "Todos" or $reqStatus == null) {
+                if ($reqStatus == $copy->filter() or $reqStatus == "Todos" or $reqStatus == null) {
                     array_push($copy_arr, $copy);
                 }
             }
@@ -337,12 +378,12 @@ class CopyModel {
     public function hasReachedRenewalLimit($copy) {
         if($copy->renewalLimit() == 0) {
             //0 = unlimited
-            return FALSE;
+            return False;
         }
         if($copy->renewalCount()/24 < $copy->renewalLimit()) {
-            return FALSE;
+            return False;
         } else {
-            return TRUE;
+            return True;
         }
     }
 }

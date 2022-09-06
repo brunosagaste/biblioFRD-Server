@@ -8,6 +8,7 @@ use App\Model\CopyModel;
 use App\Model\HoldModel;
 use App\Model\Copy;
 use PDO;
+use \Datetime;
 
 /*
 Recibo mbrid y numero de copia
@@ -73,7 +74,7 @@ class RenewalModel {
             $copy->setClassification($copy->findClassification());
             $copy->setRenewalLimit($copy->findRenewalLimit());
             
-            $renewalcheck = $this->checkRenewal($copy, $copy_model);
+            $renewalcheck = $this->checkRenewal($copy, $copy_model)['result'];
 
             if ($renewalcheck) {
                 $this->updateRenewalDate($copy); 
@@ -111,13 +112,31 @@ class RenewalModel {
                 }
             }
 
+            $renewalDelta = $copy->findRenewalDelta();
             $reachedLimit = $copy_model->hasReachedRenewalLimit($copy);
-            //Verifico si la copia se puede prestar
+            date_default_timezone_set("America/Argentina/Buenos_Aires");
+            //Verifico si el préstamo se puede renovar
             if (!$reachedLimit and $copiesIn != 0 and $bibnum > 1 and $copy->daysLate() == 0 and $holdnum == 0) {
-                //Renuevo
-                return True;
+                //Podría renovarse
+                if ($renewalDelta != 0 and $copy->dueBackDt() <= date_add(new DateTime('now'), date_interval_create_from_date_string($renewalDelta . " days"))->format('Y-m-d')) {
+                    //Cumple todos los requisitos, renuevo
+                    return array('result' => True, 'cause' => 'betweendates');
+                } elseif ($renewalDelta == 0) {
+                    //Cumple todos los requisitos y no hay una fecha de renovación configurada, renuevo
+                    return array('result' => True, 'cause' => 'deltanotset');
+                } else {
+                    //No cumple con el requisito de estar en fecha de renovación
+                    return array('result' => False, 'cause' => 'date', 'dateavailable' => date_sub(date_create_from_format('Y-m-d', $copy->dueBackDt()), date_interval_create_from_date_string("2 days"))->format('d-m'));
+                }
             } else {
-                return False;
+                //No puede renovarse
+                if ($copy->daysLate() > 0) {
+                    //No puede renovarse por estar vencido
+                    return array('result' => False, 'cause' => 'overdue');
+                } else {
+                    //No puede renovarse por otro motivo
+                    return array('result' => False, 'cause' => 'else');
+                }
             }
         } catch(Exception $e) {
             $this->response->setResponse(false, $e->getMessage());
