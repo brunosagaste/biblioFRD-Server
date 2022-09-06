@@ -86,7 +86,7 @@ class RegIDManager {
                     m.barcode_nmbr member_bcode, 
                     concat(m.last_name, ', ', m.first_name) name,
                     floor(to_days(now()) - to_days(c.due_back_dt)) days_late
-                    FROM biblio b, biblio_copy c, member m, fcm_regid f
+                    FROM $this->biblio_table b, $this->biblio_copy_table c, $this->member_table m, $this->fcm_regid_table f
                     WHERE b.bibid = c.bibid
                     AND c.mbrid = m.mbrid 
                     AND c.status_cd = 'out'
