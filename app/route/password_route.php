@@ -3,6 +3,7 @@
 use Slim\Http\Request;
 use Slim\Http\Response;
 use App\Model\UserModel;
+use App\Lib\EncryptionManager;
 
 $app->post('/password', function (Request $req, Response $res, array $args) {
 
@@ -19,7 +20,9 @@ $app->post('/password', function (Request $req, Response $res, array $args) {
     if(!$result['error']) {
     	$bdstatus = $um->changePass(md5($form_newpw), $user->mbrid);
     }
-    return $this->response->withJson(['error' =>  $result['error'], 'message' => $result['message'], 'developerMessage' => $result['field']], $result['status'], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+    $encryptionmgr = new EncryptionManager();
+    $encryptedToken = $encryptionmgr->encrypt(explode(' ', $req->getHeaderLine('Authorization'))[1], $user->mbrid);
+    return $this->response->withJson(['error' =>  $result['error'], 'message' => $result['message'], 'developerMessage' => $result['field'], 'token' => $encryptedToken], $result['status'], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 
 });
 

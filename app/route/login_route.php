@@ -5,6 +5,7 @@ use Slim\Http\Response;
 use \Firebase\JWT\JWT;
 use App\Handlers\apiError;
 use App\Model\UserModel;
+use App\Lib\EncryptionManager;
 
 $app->post('/login', function (Request $request, Response $response, array $args) {
 
@@ -33,8 +34,10 @@ $app->post('/login', function (Request $request, Response $response, array $args
     $settings = $this->get('settings'); // get settings array.
     $user->first_name = mb_convert_encoding($user->first_name, 'UTF-8', 'UTF-8'); //Al JSON no le gustan los tildes
     $token = JWT::encode(['id' => $user->mbrid, 'email' => $user->email], $settings['jwt']['secret'], "HS256");
- 
-    return $this->response->withJson(['id' => $user->mbrid, 'name' => $user->first_name,'token' => $token, 'last_name' => $user->last_name, 'file' => $user->legajo, 'address' => $user->address, 'city' => $user->city, 'phone' => $user->home_phone, 'dni' => $user->dni, 'mail' => $user->email]);
-    //$app->log->debug('Response status: ' . $response->getStatus());
+    $encryptionmgr = new EncryptionManager();
+    $encryptedToken = $encryptionmgr->encrypt($token, $user->mbrid);
+
+    return $this->response->withJson(['id' => $user->mbrid, 'name' => $user->first_name,'token' => $encryptedToken, 'last_name' => $user->last_name, 'file' => $user->legajo, 'address' => $user->address, 'city' => $user->city, 'phone' => $user->home_phone, 'dni' => $user->dni, 'mail' => $user->email]);
+
 
 });

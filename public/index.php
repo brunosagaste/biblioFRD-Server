@@ -33,16 +33,16 @@ $c['errorHandler'] = function ($c) {
 $dependencies = require __DIR__ . '/../src/dependencies.php';
 $dependencies($app);
 
-// Register middleware
-$middleware = require __DIR__ . '/../src/middleware.php';
-$middleware($app);
-
 // Register routes
 $routes = require __DIR__ . '/../src/routes.php';
 $routes($app);
 
 // Register my app
 require($_SERVER['DOCUMENT_ROOT']. '/biblioFRD-Server/app/app_loader.php');
+
+// Register middleware
+$middleware = require __DIR__ . '/../src/middleware.php';
+$middleware($app);
 
 // Run app
 $app->run();

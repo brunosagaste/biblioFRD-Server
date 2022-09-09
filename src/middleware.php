@@ -3,9 +3,9 @@
 use Slim\App;
 
 return function (App $app) {
-    // e.g: $app->add(new \Slim\Csrf\Guard);
+
     $app->add(new Slim\Middleware\JwtAuthentication([
-    "path" => ["/api", "/copy", "/hold", "/renewal", "/regid", "/password", "/search"],
+    "path" => ["/copy", "/hold", "/renewal", "/regid", "/password", "/search"],
     "secure" => false,
     "attribute" => "decoded_token_data",
     "secret" => "supersecretkeyyoushouldnotcommittogithub",
@@ -23,6 +23,8 @@ return function (App $app) {
     $checkProxyHeaders = true; // Note: Never trust the IP address for security processes!
     $trustedProxies = ['10.0.0.1', '10.0.0.2']; // Note: Never trust the IP address for security processes!
     $app->add(new RKA\Middleware\IpAddress($checkProxyHeaders, $trustedProxies));
+
+    $app->add(new TokenDecrypt(["path" => ["/copy", "/hold", "/renewal", "/regid", "/password", "/search"]]));
 
 };
 

@@ -3,7 +3,8 @@ return [
     'settings' => [
         'displayErrorDetails' => true, // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
-
+        'determineRouteBeforeAppMiddleware' => true,
+        
         // Renderer settings
         'renderer' => [
             'template_path' => __DIR__ . '/../templates/',
@@ -19,6 +20,11 @@ return [
         // Key para generar el token de identificación de usuario. No hacer un commit a Github ni compartir.
         "jwt" => [
             'secret' => 'supersecretkeyyoushouldnotcommittogithub'
+        ],
+
+        // Key para generar la encriptación del token de identificación de usuario. No hacer un commit a Github ni compartir.
+        "encryptionmanager" => [
+            'secret_iv' => 'xxxxxxxxxxxxxxxxxxxxxxxxx'
         ],
 
         "db" => [            
