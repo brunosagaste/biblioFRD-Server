@@ -126,7 +126,7 @@ class RenewalModel {
                     return array('result' => True, 'cause' => 'deltanotset');
                 } else {
                     //No cumple con el requisito de estar en fecha de renovación
-                    return array('result' => False, 'cause' => 'date', 'dateavailable' => date_sub(date_create_from_format('Y-m-d', $copy->dueBackDt()), date_interval_create_from_date_string("2 days"))->format('d/m'));
+                    return array('result' => False, 'cause' => 'date', 'dateavailable' => date_sub(date_create_from_format('Y-m-d', $copy->dueBackDt()), date_interval_create_from_date_string($renewalDelta . " days"))->format('d/m'));
                 }
             } else {
                 //No puede renovarse
