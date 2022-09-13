@@ -38,11 +38,17 @@ function checkPass($pass_user, $form_newpw, $form_newpwconfirm, $form_actualpw) 
 	//No tiene sentido que el error que llegue sea que la clave no tiene un número, si la clave que eligió está vacía, o si se equivocó en la actual.
 	//Tampoco tiene sentido mandar todos los errores al mismo tiempo, confundiendo al usuario en que debe corregir. Mejor uno por vez.
 
+    if (strlen($form_newpw) < 8) {
+		$error = true;
+        $message = "La contraseña debe tener más de 8 caracteres";
+        $field = "newpw";
+    }
+
 	if (strlen($form_newpw) > 20) {
 		$error = true;
         $message = "La contraseña debe tener menos de 20 caracteres";
         $field = "newpw"; //Útil para mostrar que campo el usuario debe corregir
-    }  
+    }
 
     if (!preg_match("#[0-9]+#", $form_newpw)) {
     	$error = true;
@@ -67,12 +73,6 @@ function checkPass($pass_user, $form_newpw, $form_newpwconfirm, $form_actualpw) 
         $message = "La contraseña debe tener al menos un caracter especial";
         $field = "newpw";
     }
-
-    if (strlen($form_newpw) < 8) {
-		$error = true;
-        $message = "La contraseña debe tener más de 8 caracteres";
-        $field = "newpw";
-    }    
 
 	if(is_null($form_newpw) or empty($form_newpw) or ctype_space($form_newpw)) {
 		$error = true;
