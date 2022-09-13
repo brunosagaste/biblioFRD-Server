@@ -45,6 +45,7 @@ class Copy {
     public $status;
     public $loan_begin_dt;
     public $filter;
+    public $last_renewal_by;
 
     // constructor with $db as database connection
     public function __construct(){
@@ -99,12 +100,16 @@ class Copy {
         return $this->status;
     }
 
-    function loanBeginDt($value) {
+    function loanBeginDt() {
         return $this->loan_begin_dt;
     }
 
     function filter() {
         return $this->filter;
+    }
+
+    function lastRenewalBy() {
+        return $this->last_renewal_by;
     }
 
     function setBibid($value) {
@@ -161,11 +166,15 @@ class Copy {
 
     function setFilter($value) {
         $this->filter = $value;
+    }  
+    
+    function setLastRenewalBy($value) {
+        $this->last_renewal_by = $value;
     }
 
     public function update() {
-        $sql = "UPDATE $this->biblio_copy_table SET renewal_count = ?, due_back_dt = ? WHERE copyid = ? AND bibid = ?";
-        $this->db->prepare($sql)->execute(array($this->renewalCount(), $this->dueBackDt(), $this->copyid(), $this->bibid()));
+        $sql = "UPDATE $this->biblio_copy_table SET renewal_count = ?, due_back_dt = ?, last_renewal_by = ? WHERE copyid = ? AND bibid = ?";
+        $this->db->prepare($sql)->execute(array($this->renewalCount(), $this->dueBackDt(), $this->lastRenewalBy(), $this->copyid(), $this->bibid()));
     }
 
     //Busca el tipo de material

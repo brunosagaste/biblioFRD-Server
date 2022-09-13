@@ -73,6 +73,7 @@ class RenewalModel {
             $copy->setMbrid($mbrid);
             $copy->setClassification($copy->findClassification());
             $copy->setRenewalLimit($copy->findRenewalLimit());
+            $copy->setLastRenewalBy("member");
             
             $renewalcheck = $this->checkRenewal($copy, $copy_model)['result'];
 
