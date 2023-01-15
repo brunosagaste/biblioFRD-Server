@@ -19,9 +19,11 @@ $app->post('/password', function (Request $req, Response $res, array $args) {
     //Si la clave está bien la cambiamos
     if(!$result['error']) {
     	$bdstatus = $um->changePass(md5($form_newpw), $user->mbrid);
+        $encryptionmgr = new EncryptionManager();
+        $encryptedToken = $encryptionmgr->encrypt(explode(' ', $req->getHeaderLine('Authorization'))[1], $user->mbrid);
+    } else {
+        $encryptedToken = '';
     }
-    $encryptionmgr = new EncryptionManager();
-    $encryptedToken = $encryptionmgr->encrypt(explode(' ', $req->getHeaderLine('Authorization'))[1], $user->mbrid);
     return $this->response->withJson(['error' =>  $result['error'], 'message' => $result['message'], 'developerMessage' => $result['field'], 'token' => $encryptedToken], $result['status'], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 
 });
