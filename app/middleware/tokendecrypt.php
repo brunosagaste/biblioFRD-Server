@@ -20,7 +20,10 @@ class TokenDecrypt {
         }
 
         $encryptedToken = $request->getHeaderLine('Auth');
-        $id = $request->getHeaderLine('Id'); 
+        $id = $request->getHeaderLine('Id');
+        if ($id == '') {
+            return $response->withJson(['error' => true, 'status' => 401, 'message' => 'Error en el id', 'developerMessage' => 'wrongid'], 401);
+        }
 
         $encryptionmgr = new EncryptionManager();
         $decryptedToken = $encryptionmgr->decrypt($encryptedToken, $id);
