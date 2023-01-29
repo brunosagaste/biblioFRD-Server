@@ -191,7 +191,7 @@ class Copy {
         }
     }
 
-    //Busca por cuántos días se puede renovar según la carrera y el tipo de material
+    //Busca porcuántas veces puede renovar según la carrera y el tipo de material
     public function findRenewalLimit() {
         try {
             $stm = $this->db->prepare("SELECT 
@@ -203,7 +203,11 @@ class Copy {
                 AND $this->biblio_copy_table.bibid = :bibid
                 AND $this->checkout_privs_table.classification = :classification");
             $stm->execute(array(":copyid" => $this->copyid, ":bibid" => $this->bibid, ":classification" => $this->classification));
-            $renewal_limit = $stm->fetch()->renewal_limit;
+            if ($stm->rowCount() > 0) {
+                $renewal_limit = $stm->fetch()->renewal_limit;
+            } else {
+                $renewal_limit = 0;
+            }
             return $renewal_limit;
 
         } catch(Exception $e) {
@@ -224,7 +228,11 @@ class Copy {
                 AND $this->biblio_copy_table.bibid = :bibid
                 AND $this->checkout_privs_table.classification = :classification");
             $stm->execute(array(":copyid" => $this->copyid, ":bibid" => $this->bibid, ":classification" => $this->classification));
-            $renewal_delta = $stm->fetch()->renewal_delta;
+            if ($stm->rowCount() > 0) {
+                $renewal_delta = $stm->fetch()->renewal_delta;
+            } else {
+                $renewal_delta = 0;
+            }
             return $renewal_delta;
 
         } catch(Exception $e) {
