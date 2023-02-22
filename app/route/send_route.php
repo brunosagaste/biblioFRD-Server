@@ -3,6 +3,7 @@
 use Slim\Http\Request;
 use Slim\Http\Response;
 use App\Lib\Notification;
+use \Slim\App;
 
 //Endpoint para mandar notificaciones. Se supone que es necesario tener un token y también hay un control por ip, para verificar que el pedido sea del localhost.
 //Cada vez que recibe un request envía una notificacion sobre préstamos vencidos.
@@ -11,9 +12,13 @@ $app->post('/send', function (Request $req, Response $res, array $args) {
     $input = $req->getParsedBody();
     $ipAddress = $req->getAttribute('ip_address');
     $status = "";
-    //var_dump($ipAddress); //Útil para testeos
 
-    if ($input['token'] != "eltokensupersecretoconelquenodeberiashaceruncommitagithub") {
+    $settings = require dirname(__DIR__) . '/../src/settings.php';
+    $app = new \Slim\App($settings);
+    $container = $app->getContainer();
+    $secret = $container->get('settings')['notifications']['secret'];
+
+    if ($input['token'] != $secret) {
         return $this->response->withJson(['error' => true, 'status' => 400, 'message' => 'Missing or invalid token', 'developerMessage' => 'Missing token'], 400); 
     }
 

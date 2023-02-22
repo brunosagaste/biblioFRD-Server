@@ -1,7 +1,7 @@
 <?php
 return [
     'settings' => [
-        'displayErrorDetails' => true, // set to false in production
+        'displayErrorDetails' => false, // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
         'determineRouteBeforeAppMiddleware' => true,
         
@@ -37,6 +37,11 @@ return [
         // Key para enviar notificaciones. No hacer un commit a Github ni compartir.
         "firebase" => [
             'firebase_secret' => 'supersecretkeyyoushouldnotcommittogithub'
+        ],
+
+        // Key para enviar notificaciones. No hacer un commit a Github ni compartir.
+        "notifications" => [
+            'secret' => 'supersecretkeyyoushouldnotcommittogithub'
         ],
 
     ],
