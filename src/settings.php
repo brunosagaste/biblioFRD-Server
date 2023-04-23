@@ -27,11 +27,11 @@ return [
             'secret_iv' => 'xxxxxxxxxxxxxxxxxxxxxxxxx'
         ],
 
-        "db" => [            
-             "host" => "localhost",             
-             "dbname" => "espa33",             
-             "user" => "root",            
-             "pass" => ""        
+        "db" => [
+             "host" => "localhost",
+             "dbname" => "espa33",
+             "user" => "root",
+             "pass" => ""
          ],
 
         // Key para enviar notificaciones. No hacer un commit a Github ni compartir.

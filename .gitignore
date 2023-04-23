@@ -2,3 +2,5 @@
 /logs/*
 !/logs/README.md
 .DS_Store
+.php_cs.cache
+/tools/

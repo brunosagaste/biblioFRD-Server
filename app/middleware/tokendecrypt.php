@@ -1,7 +1,7 @@
 <?php 
 
 use App\Lib\EncryptionManager;
-use Slim\Middleware\JwtAuthentication\RequestPathRule;
+use Tuupola\Middleware\JwtAuthentication\RequestPathRule;
 
 class TokenDecrypt {
     public function __construct(array $options = []) {

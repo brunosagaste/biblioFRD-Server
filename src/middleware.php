@@ -3,8 +3,7 @@
 use Slim\App;
 
 return function (App $app) {
-
-    $app->add(new Slim\Middleware\JwtAuthentication([
+    $app->add(new Tuupola\Middleware\JwtAuthentication([
     "path" => ["/copy", "/hold", "/renewal", "/regid", "/password", "/search", "/book"],
     "secure" => false,
     "attribute" => "decoded_token_data",
@@ -17,7 +16,7 @@ return function (App $app) {
             ->withHeader("Content-Type", "application/json")
             ->withStatus(401)
             ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-        }
+    }
     ]));
 
     $checkProxyHeaders = true; // Note: Never trust the IP address for security processes!
@@ -25,6 +24,4 @@ return function (App $app) {
     $app->add(new RKA\Middleware\IpAddress($checkProxyHeaders, $trustedProxies));
 
     $app->add(new TokenDecrypt(["path" => ["/copy", "/hold", "/renewal", "/regid", "/password", "/search", "/book"]]));
-
 };
-
