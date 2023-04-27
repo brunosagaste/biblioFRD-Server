@@ -1,5 +1,6 @@
 <?php
-use App\Model\RenewalModel;
+
+use App\Manager\RenewalManager;
 
 $app->group('/renewal/', function () {
 
@@ -7,9 +8,9 @@ $app->group('/renewal/', function () {
         $allGetVars = $req->getQueryParams();
         $bibid = $allGetVars['bibid'];
         $copyid = $allGetVars['copyid'];
-        $um = new RenewalModel();
+        $um = new RenewalManager();
         $user = $req->getAttribute('decoded_token_data');
 
-        return $res->withJson($um->renew($user->id, $bibid, $copyid), 200, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+        return $res->withJson($um->renew($user['id'], $bibid, $copyid), 200, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
     });
 });

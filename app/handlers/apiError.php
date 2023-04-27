@@ -2,7 +2,8 @@
 
 namespace App\Handlers;
 
-class apiError extends \Exception {
+class ApiError extends \Exception
+{
     public function __invoke($request, $response, $exception)
     {
         $status = /*$exception->getCode() ?:*/ 403;

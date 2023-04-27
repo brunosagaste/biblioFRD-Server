@@ -1,9 +1,11 @@
 <?php
+
 $base = $_SERVER['DOCUMENT_ROOT'] . '/biblioFRD-Server/app/';
 
 $folders = [
-	'handlers',
+    'handlers',
     'lib',
+    'manager',
     'middleware',
     'model',
     'route',

@@ -19,7 +19,7 @@ return function (App $app) {
         $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
         return $logger;
     };
-    
+
     // PDO database library
     $container['db'] = function ($c) {
         $settings = $c->get('settings')['db'];

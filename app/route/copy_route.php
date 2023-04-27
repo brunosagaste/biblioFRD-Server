@@ -1,10 +1,13 @@
 <?php
-use App\Model\CopyModel;
+
+use App\Manager\CopyManager;
+use App\Lib\Response;
 
 $app->group('/copy/', function () {
 
     $this->get('get', function ($req, $res, $args) {
-        $um = new CopyModel();
+        $response = new Response();
+        $cm = new CopyManager();
         $user = $req->getAttribute('decoded_token_data');
         $allGetVars = $req->getQueryParams();
         if (isset($allGetVars['status'])) {
@@ -13,7 +16,9 @@ $app->group('/copy/', function () {
             $status = null;
         }
 
-        return $res->withJson($um->get($user->id, $status), 200, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+        $response->result = $cm->getCopiesByMbrid($user['id'], $status);
+        $response->setResponse(true);
+
+        return $res->withJson($response, 200, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
     });
 });
-

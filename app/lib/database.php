@@ -1,11 +1,15 @@
 <?php
+
 namespace App\Lib;
-use \Slim\App;
+
+use Slim\App;
 use PDO;
 
-class Database {
-    public static function StartUp() {
-        
+class Database
+{
+    public static function StartUp(): \PDO
+    {
+
         $settings = require dirname(__DIR__) . '/../src/settings.php';
         $app = new \Slim\App($settings);
         $container = $app->getContainer();
@@ -17,7 +21,7 @@ class Database {
         $pdo = new PDO("mysql:host={$host};dbname={$dbname};charset=utf8", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
-        
+
         return $pdo;
     }
 }

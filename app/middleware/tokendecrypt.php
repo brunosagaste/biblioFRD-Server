@@ -1,11 +1,16 @@
-<?php 
+<?php
 
 use App\Lib\EncryptionManager;
 use Tuupola\Middleware\JwtAuthentication\RequestPathRule;
 
-class TokenDecrypt {
-    public function __construct(array $options = []) {
-        $this->rules = new \SplStack;
+class TokenDecrypt
+{
+    private $rules;
+    private $options;
+    
+    public function __construct(array $options = [])
+    {
+        $this->rules = new \SplStack();
         $this->options = $options;
 
         $this->addRule(new RequestPathRule([
@@ -13,7 +18,8 @@ class TokenDecrypt {
         ]));
     }
 
-    public function __invoke($request, $response, $next) {
+    public function __invoke($request, $response, $next)
+    {
 
         if (false === $this->shouldAuthenticate($request)) {
             return $next($request, $response);
@@ -35,7 +41,8 @@ class TokenDecrypt {
         return $next($request, $response);
     }
 
-    public function shouldAuthenticate($request) {
+    public function shouldAuthenticate($request)
+    {
         foreach ($this->rules as $callable) {
             if (false === $callable($request)) {
                 return false;
@@ -44,7 +51,8 @@ class TokenDecrypt {
         return true;
     }
 
-    public function addRule($callable) {
+    public function addRule($callable)
+    {
         $this->rules->push($callable);
         return $this;
     }

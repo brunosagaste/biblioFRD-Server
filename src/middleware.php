@@ -4,12 +4,12 @@ use Slim\App;
 
 return function (App $app) {
     $app->add(new Tuupola\Middleware\JwtAuthentication([
-    "path" => ["/copy", "/hold", "/renewal", "/regid", "/password", "/search", "/book"],
+    "path" => ["/copy", "/renewal", "/regid", "/password", "/search", "/book"],
     "secure" => false,
     "attribute" => "decoded_token_data",
     "secret" => "supersecretkeyyoushouldnotcommittogithub",
     "algorithm" => ["HS256"],
-    "error" => function ($req, $res, $args) {
+    "error" => function ($res, $args) {
         $data["status"] = "error";
         $data["message"] = $args["message"];
         return $res
@@ -23,5 +23,5 @@ return function (App $app) {
     $trustedProxies = ['10.0.0.1', '10.0.0.2']; // Note: Never trust the IP address for security processes!
     $app->add(new RKA\Middleware\IpAddress($checkProxyHeaders, $trustedProxies));
 
-    $app->add(new TokenDecrypt(["path" => ["/copy", "/hold", "/renewal", "/regid", "/password", "/search", "/book"]]));
+    $app->add(new TokenDecrypt(["path" => ["/copy", "/renewal", "/regid", "/password", "/search", "/book"]]));
 };

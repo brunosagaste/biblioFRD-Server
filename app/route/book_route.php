@@ -1,11 +1,18 @@
 <?php
 
 use App\Model\BookModel;
+use App\Lib\Response;
 
 $app->group('/book/', function () {
 
     $this->get('get/{id}', function ($req, $res, $args) {
-        $um = new BookModel();
-        return $res->withJson($um->get($args['id']), 200);
+        $response = new Response();
+        try {
+            $response->result = new BookModel($args['id']);
+            $response->setResponse(true);
+        } catch (ApiError $e) {
+            $response->message = $e;
+        }
+        return $res->withJson($response, 200);
     });
 });

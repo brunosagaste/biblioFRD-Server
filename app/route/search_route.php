@@ -1,4 +1,5 @@
 <?php
+
 use App\Model\SearchModel;
 
 $app->group('/search/', function () {

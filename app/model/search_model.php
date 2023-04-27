@@ -1,22 +1,26 @@
 <?php
+
 namespace App\Model;
 
 use App\Lib\Database;
 use App\Lib\Response;
 use PDO;
 
-class SearchModel {
+class SearchModel
+{
     private $db;
     private $biblio_table = "biblio";
     private $biblio_copy_table = "biblio_copy";
     private $response;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Database::StartUp();
         $this->response = new Response();
     }
 
-    public function search($text) {
+    public function search(string $text): Response
+    {
         try {
             $result = array();
             $stm = $this->db->prepare("SELECT 

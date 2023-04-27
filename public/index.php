@@ -25,7 +25,7 @@ $app = new \Slim\App($settings);
 $c = $app->getContainer();
 
 $c['errorHandler'] = function ($c) {
-    return new App\Handlers\apiError;
+    return new App\Handlers\apiError();
 };
 
 
@@ -46,4 +46,3 @@ $middleware($app);
 
 // Run app
 $app->run();
-
