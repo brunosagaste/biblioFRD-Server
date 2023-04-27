@@ -18,7 +18,8 @@ $app->post('/login', function (Request $request, Response $response, array $args
             'error' => $result['error'],
             'status' => $result['status'],
             'message' => $result['message'],
-            'developerMessage' => $result['developerMessage']]);
+            'developerMessage' => $result['developerMessage']],
+            $result['status']);
     }
     $settings = $this->get('settings'); // get settings array.
     $token = JWT::encode(['id' => $user->getMbrid(), 'email' => $user->getEmail()], $settings['jwt']['secret'], "HS256");
