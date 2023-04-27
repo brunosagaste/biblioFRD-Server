@@ -52,7 +52,7 @@ class RenewalManager
             //Intento renovar una copia
             $copy_manager = new CopyManager();
             $copy = $copy_manager->getSpecificCopy($bibid, $copyid);
-            
+
             //Verifico que el mbrid realmente tenga prestada esa copia
             if ($mbrid != $copy->getMbrid()) {
                 throw new ApiError('No tiene un préstamo sobre la copia');
@@ -87,7 +87,7 @@ class RenewalManager
             //Obtengo todas las copias del libro
             $book = new BookModel($copy->getBibid());
             $copies = $book->getCopies();
-            
+
             //Contamos la cantidad de copias que no están prestadas
             $copiesIn = 0;
             foreach ($copies as $arrcopy) {

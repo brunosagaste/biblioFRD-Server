@@ -7,7 +7,7 @@ class TokenDecrypt
 {
     private $rules;
     private $options;
-    
+
     public function __construct(array $options = [])
     {
         $this->rules = new \SplStack();

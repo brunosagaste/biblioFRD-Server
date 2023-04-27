@@ -81,7 +81,7 @@ class RegIDModel
             while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
                 extract($row);
                 $regid = array(
-                    'regid' => $regid, 
+                    'regid' => $regid,
                     'late_books' => $late_books
                 );
                 array_push($regids, $regid);
@@ -129,7 +129,7 @@ class RegIDModel
             while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
                 extract($row);
                 $regid = array(
-                    'regid' => $regid, 
+                    'regid' => $regid,
                     'remind_books' => $remind_books
                 );
                 array_push($regids, $regid);

@@ -110,7 +110,7 @@ class CopyManager
                 $copy->setLoanBeginDt($status_begin_dt);
                 //Evitar setear LastRenewalBy para no exponer el dato
 
-                //RenewalManager nos va a decir en que estado está el préstamo para mostrar 
+                //RenewalManager nos va a decir en que estado está el préstamo para mostrar
                 //el botón de renovar o setear el correcto color de tarjeta en la app
                 $renewalModel = new RenewalManager();
                 $renewalcheck = $renewalModel->checkRenewal($copy);

@@ -34,7 +34,7 @@ class UserModel
         if (is_numeric($user_id)) {
             $this->getUserbyFileNumber($user_id);
         }
-        if (!$user_id){
+        if (!$user_id) {
             $this->getUserbyMbrid($mbrid);
         }
     }
@@ -76,7 +76,8 @@ class UserModel
     }
     public function setLastName(?string $last_name): void
     {
-        $this->last_name = mb_convert_encoding($last_name, 'UTF-8', 'UTF-8');;
+        $this->last_name = mb_convert_encoding($last_name, 'UTF-8', 'UTF-8');
+        ;
     }
     public function getFilenmbr(): ?int
     {
@@ -113,15 +114,14 @@ class UserModel
     public function getDni(): ?int
     {
         return $this->dni;
-    } 
+    }
     public function setDni(?int $dni): void
     {
         $this->dni = $dni;
     }
     private function setAttributes(stdClass|bool $user): void
     {
-        if ($user) 
-        {
+        if ($user) {
             $this->setMbrid($user->mbrid);
             $this->setEmail($user->email);
             $this->setPassword($user->pass_user);
@@ -134,7 +134,7 @@ class UserModel
             $this->setDni($user->dni);
         }
     }
-    
+
 
     private function getUserbyEmail(string $email): bool|Response
     {
@@ -178,7 +178,7 @@ class UserModel
             $user = $sth->fetchObject();
             $this->setAttributes($user);
             return true;
-            
+
         } catch(Exception $e) {
             $this->response->setResponse(false, $e->getMessage());
             return $this->response;
@@ -188,16 +188,16 @@ class UserModel
    public function changePass(string $newpass): bool|Response
    {
        try {
-            $newpass = md5($newpass);
-            $sql = "UPDATE $this->member_table SET pass_user = :newpass WHERE mbrid = :mbrid";
-            $sth = $this->db->prepare($sql);
-            $sth->execute(array(":newpass" => $newpass, ":mbrid" => $this->mbrid));
-            $this->setPassword($newpass);
-            return true;
+           $newpass = md5($newpass);
+           $sql = "UPDATE $this->member_table SET pass_user = :newpass WHERE mbrid = :mbrid";
+           $sth = $this->db->prepare($sql);
+           $sth->execute(array(":newpass" => $newpass, ":mbrid" => $this->mbrid));
+           $this->setPassword($newpass);
+           return true;
 
        } catch(Exception $e) {
-            $this->response->setResponse(false, $e->getMessage());
-             return $this->response;
+           $this->response->setResponse(false, $e->getMessage());
+           return $this->response;
        }
    }
 }
