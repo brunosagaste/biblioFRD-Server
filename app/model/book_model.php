@@ -98,6 +98,11 @@ class BookModel
                 $copy->setAuthor($this->author);
                 $copy->setLoanBeginDt($status_begin_dt);
                 $copy->setLastRenewalBy($last_renewal_by);
+                if (!empty($mbrid)) {
+                    $copy->setDueBackDt($due_back_dt);
+                    $copy->setClassification($copy->findClassification());
+                    $copy->setRenewalLimit($copy->findRenewalLimit());
+                }
                 array_push($copies, $copy);
             }
             return $copies;

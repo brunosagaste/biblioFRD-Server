@@ -91,11 +91,11 @@ class RenewalManager
             //Contamos la cantidad de copias que no están prestadas
             $copiesIn = 0;
             foreach ($copies as $arrcopy) {
-                if ($arrcopy->due_back_dt == "") {
+                if (!empty($arrcopy->getDueBackDt())) {
                     $copiesIn++;
                 }
             }
-
+            
             $renewalDelta = $copy->findRenewalDelta();
             $reachedLimit = $copy->hasReachedRenewalLimit();
             date_default_timezone_set("America/Argentina/Buenos_Aires");
