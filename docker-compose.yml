@@ -1,18 +1,13 @@
-version: '2'
-
-volumes:
-    logs:
-        driver: local
-
+version: '3.3'
 services:
-    slim:
-        image: php:7-alpine
-        working_dir: /var/www
-        command: php -S 0.0.0.0:8080 -t public
-        environment:
-            docker: "true"
+    php:
         ports:
-            - 8080:8080
+            - '80:80'
+            - '3306:3306'
         volumes:
-            - .:/var/www
-            - logs:/var/www/logs
+            - '${PWD}:/var/www/html/biblioFRD-Server'
+        restart: on-failure
+        logging:
+            options:
+                max-size: 1g
+        image: 'php:8.0.28-apache'
