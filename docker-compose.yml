@@ -1,12 +1,18 @@
 version: '3.3'
 services:
     php:
+        build: .
         ports:
             - '80:80'
             - '3306:3306'
         volumes:
             - '${PWD}:/var/www/html/biblioFRD-Server'
+        container_name: biblioteca-app
+        stdin_open: true
+        tty: true
         restart: on-failure
+        entrypoint: docker-php-entrypoint
+        command: ['/bin/sh', '-c', 'cd /var/www/html/biblioFRD-Server && composer install && apache2-foreground']
         logging:
             options:
                 max-size: 1g
