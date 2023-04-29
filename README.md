@@ -7,7 +7,7 @@ Backend de la app de biblioteca realizado con Slim Framework 3.
 El proyecto es instalable a través de Docker Compose.
 
     git clone https://github.com/brunosagaste/biblioFRD-Server && cd biblioFRD-Server
-    docker compose up --build
+    docker-compose up --build -d
 
 Compose realizará las siguientes tareas:
 
