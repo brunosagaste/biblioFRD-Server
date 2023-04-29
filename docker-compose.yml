@@ -4,7 +4,6 @@ services:
         build: .
         ports:
             - '80:80'
-            - '3306:3306'
         volumes:
             - '${PWD}:/var/www/html/biblioFRD-Server'
         container_name: biblioteca-app
