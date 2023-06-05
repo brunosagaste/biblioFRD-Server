@@ -4,6 +4,8 @@ services:
         build: .
         ports:
             - '80:80'
+        networks:
+            - espa33
         volumes:
             - '${PWD}:/var/www/html/biblioFRD-Server'
         container_name: biblioteca-app
@@ -16,3 +18,6 @@ services:
             options:
                 max-size: 1g
         image: 'php:8.0.28-apache'
+networks:
+    espa33:
+        external: true
