@@ -227,7 +227,7 @@ class CopyModel
         }
     }
 
-    //Busca porcuántas veces puede renovar según la carrera y el tipo de material
+    //Busca por cuántas veces puede renovar según la carrera y el tipo de material
     public function findRenewalLimit(): int
     {
         try {
